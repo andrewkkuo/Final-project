@@ -8,7 +8,6 @@
 #include "bbcar_info_server.h"
 #define CENTER_BASE 1500
 
-using namespace std::chrono;
 Ticker timer;
 int temp = 12;
 Ticker encoder_ticker;
