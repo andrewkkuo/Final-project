@@ -148,7 +148,6 @@ int main()
         } 
         else if (pattern == 0) {
             car.stop();
-            ThisThread::sleep_for(10s);
         }
         else car.goStraight(70);
     }
