@@ -1,0 +1,6 @@
+program bbcar_info; // specify name of output files
+
+interface BBCarService // cover functions for same topic
+{
+   info() -> void
+}
