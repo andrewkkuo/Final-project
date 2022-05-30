@@ -9,7 +9,7 @@
 #define CENTER_BASE 1500
 
 Ticker timer;
-int temp = 12;
+int temp = 10;
 Ticker encoder_ticker;
 Ticker servo_ticker;
 volatile int steps;
@@ -87,6 +87,7 @@ int main()
         L.input();
         wait_us(230);
         int pattern = FL * 1000 + L * 100 + R * 10 + FR;
+        printf("%d\n",pattern);
         if (ping1 < 15) {
             car.turnaround();
             ThisThread::sleep_for(1800ms);
@@ -95,26 +96,29 @@ int main()
         else if (pattern == 111) {
             car.goStraight(70);
             nextt = 1;
+            temp--;
         }
         else if (pattern == 1111) {
             if (nexttt == 1) {
                 car.turn(200, 0.00000001);
-                ThisThread::sleep_for(300ms);
+                ThisThread::sleep_for(500ms);
                 pin5 = 0;
             }
-            else if (nextt == 1) {
+            else if (nextt == 1 && temp <= 0) {
                 car.turn(200, -0.00000001);
-                ThisThread::sleep_for(300ms);
+                ThisThread::sleep_for(600ms);
                 pin6 = 0;
+                nextt = 0;
             } 
             else if (nextt == 2) {
                 car.turn(200, 0.00000001);
-                ThisThread::sleep_for(300ms);
+                ThisThread::sleep_for(600ms);
                 pin5 = 0;
+                nextt = 0;
             } else car.goStraight(70);
         }
         else if (pattern == 1110) {
-            if (temp <= 1 && first == 0) {
+            if ((nextt == 0) && first == 0) {
                 car.turnaround();
                 ThisThread::sleep_for(1650ms);
                 nexttt = 1;
