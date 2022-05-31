@@ -28,6 +28,7 @@ int nexttt = 0;
 float llast = 0;
 float distancee = 0;
 float num  = 0;
+Thread u;
 
 ep::UARTTransport uart_transport(D1, D0, 9600);
 ep::DynamicMessageBufferFactory dynamic_mbf;
@@ -37,14 +38,21 @@ erpc::SimpleServer rpc_server;
 BBCarService_service bbcar_service;
 
 void info() {
-    printf("distance: %f\n", steps *6.5 * 3.14 / 32);
-    printf("current speed: %f\n", num);
+    while(1) {
+        printf("distance: %f\n", steps *6.5 * 3.14 / 32);
+        printf("current speed: %f\n", num);
+        ThisThread::sleep_for(1s);
+    }
 }
 
 void calculate() {
     distancee = steps *6.5 * 3.14 / 32;
     num = distancee - llast;
     llast = distancee;
+}
+
+void callfunc() {
+    timer.attach(&calculate, 1s);
 }
 
 void encoder_control() {
@@ -69,7 +77,7 @@ int main()
     encoder_ticker.attach(&encoder_control, 1ms);
     steps = 0;
     last = 0;
-    timer.attach(&calculate, 1s);
+    u.start(callfunc);
     s.start(rpc);
     while (1) {
         FR.output();
@@ -87,10 +95,10 @@ int main()
         L.input();
         wait_us(230);
         int pattern = FL * 1000 + L * 100 + R * 10 + FR;
-        printf("%d\n",pattern);
+        // printf("%d\n",pattern);
         if (ping1 < 15) {
             car.turnaround();
-            ThisThread::sleep_for(1800ms);
+            ThisThread::sleep_for(2500ms);
             nextt = 2;
         }
         else if (pattern == 111) {
@@ -102,18 +110,15 @@ int main()
             if (nexttt == 1) {
                 car.turn(200, 0.00000001);
                 ThisThread::sleep_for(500ms);
-                pin5 = 0;
             }
             else if (nextt == 1 && temp <= 0) {
                 car.turn(200, -0.00000001);
                 ThisThread::sleep_for(600ms);
-                pin6 = 0;
                 nextt = 0;
             } 
             else if (nextt == 2) {
                 car.turn(200, 0.00000001);
-                ThisThread::sleep_for(600ms);
-                pin5 = 0;
+                ThisThread::sleep_for(450ms);
                 nextt = 0;
             } else car.goStraight(70);
         }
@@ -141,7 +146,7 @@ int main()
             car.goStraight(70);
         }
         else if (pattern == 10) {
-            car.turn(160, -0.7);
+            car.turn(160, -0.5);
         }
         else if (pattern == 11) {
             car.turn(100, -0.1);
